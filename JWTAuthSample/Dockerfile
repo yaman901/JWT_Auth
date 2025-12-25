@@ -1,16 +1,21 @@
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY JWTAuthSample/JWTAuthSample.csproj .
+# Copy the project file and restore dependencies
+COPY JWTAuthSample.csproj ./
 RUN dotnet restore JWTAuthSample.csproj
 
-COPY JWTAuthSample/. .
-RUN dotnet build JWTAuthSample.csproj -c Release -o /app/build
-
-FROM build AS publish
+# Copy the rest of the source code and build the project
+COPY . ./
 RUN dotnet publish JWTAuthSample.csproj -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+# Copy the published output from the build stage
+COPY --from=build /app/publish .
+
+# Start the app
 ENTRYPOINT ["dotnet", "JWTAuthSample.dll"]
