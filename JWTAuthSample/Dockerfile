@@ -7,24 +7,24 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
-# This stage is used to build the service project
+# =============================
+# Build stage
+# =============================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["JWTAuthSample/JWTAuthSample.csproj", "."]
-RUN dotnet restore "./JWTAuthSample/JWTAuthSample.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./JWTAuthSample/JWTAuthSample.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./JWTAuthSample/JWTAuthSample.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+COPY JWTAuthSample/JWTAuthSample.csproj .
+RUN dotnet restore JWTAuthSample.csproj
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+COPY JWTAuthSample/JWTAuthSample/. .
+RUN dotnet publish -c Release -o /app/publish
+
+# =============================
+# Runtime stage
+# =============================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+EXPOSE 8080
+
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "JWTAuthSample.dll"]
