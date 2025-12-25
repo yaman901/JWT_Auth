@@ -1,30 +1,14 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
-# =============================
-# Build stage
-# =============================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY JWTAuthSample/JWTAuthSample.csproj .
+COPY JWTAuthSample.csproj .
 RUN dotnet restore JWTAuthSample.csproj
 
-COPY JWTAuthSample/JWTAuthSample/. .
+COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
-# =============================
-# Runtime stage
-# =============================
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 EXPOSE 8080
-
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "JWTAuthSample.dll"]

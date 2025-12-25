@@ -70,11 +70,10 @@ var app = builder.Build();
 app.Urls.Add("http://0.0.0.0:8080");
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
