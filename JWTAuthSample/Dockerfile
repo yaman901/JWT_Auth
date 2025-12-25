@@ -3,11 +3,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy the project file and restore dependencies
-COPY JWTAuthSample.csproj ./
+COPY JWTAuthSample/JWTAuthSample.csproj ./
 RUN dotnet restore JWTAuthSample.csproj
 
 # Copy the rest of the source code and build the project
-COPY . ./
+COPY JWTAuthSample/. ./
 RUN dotnet publish JWTAuthSample.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
